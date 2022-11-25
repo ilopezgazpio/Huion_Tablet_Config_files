@@ -17,6 +17,8 @@
 # CREATE FILE /usr/share/X11/xorg.conf.d/50-huion.conf
 # xsetwacom --list
 
+# Install also dev files for libwacom in synaptic
+
 # PAD SHOULD HAVE NAME AS BELOW
 # Tablet definition  
 tabletstylus="TABLET Pen Tablet Pen stylus"  
