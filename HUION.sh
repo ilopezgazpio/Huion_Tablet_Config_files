@@ -21,8 +21,9 @@
 
 # PAD SHOULD HAVE NAME AS BELOW
 # Tablet definition  
-tabletstylus="TABLET Pen Tablet Pen stylus"  
-tabletpad="TABLET Pen Tablet Pad pad"  
+tabletstylus="TABLET Pen Tablet stylus"  
+tabletpad="TABLET Pen Tablet Pad pad"
+# tabletpad="TABLET Pen Tablet Touch Strip pad"
 
 # Reset  
 xsetwacom --set "$tabletstylus" ResetArea  
@@ -39,7 +40,8 @@ screenX=1920
 screenY=1080  
 # map to good screen (dual nvidia)
 # xrandr command to obtain displays
-xsetwacom --set "$tabletstylus" MapToOutput "DP-1"  
+# there is a nvidia bug -> use HEAD-0 -1 , n instead of output from xrandr
+xsetwacom --set "$tabletstylus" MapToOutput HEAD-0
 # setup ratio :  
 newtabletY=$(( $screenY * $tabletX / $screenX ))  
 xsetwacom --set "$tabletstylus" Area 0 0 "$tabletX" "$newtabletY"  
