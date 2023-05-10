@@ -41,7 +41,10 @@ screenY=1080
 # map to good screen (dual nvidia)
 # xrandr command to obtain displays
 # there is a nvidia bug -> use HEAD-0 -1 , n instead of output from xrandr
-xsetwacom --set "$tabletstylus" MapToOutput HEAD-0
+
+#xsetwacom --set "$tabletstylus" MapToOutput HEAD-0
+xsetwacom --set "$tabletstylus" MapToOutput HDMI-A-0
+
 # setup ratio :  
 newtabletY=$(( $screenY * $tabletX / $screenX ))  
 xsetwacom --set "$tabletstylus" Area 0 0 "$tabletX" "$newtabletY"  
