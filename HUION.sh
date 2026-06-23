@@ -26,10 +26,23 @@ tabletpad="TABLET Pen Tablet Pad pad"
 # tabletpad="TABLET Pen Tablet Touch Strip pad"
 
 # Monitor mapping:
-#   ./HUION.sh left   -> HEAD-1
-#   ./HUION.sh right  -> HEAD-0
+#   ./HUION.sh left             -> HEAD-1 landscape
+#   ./HUION.sh right            -> HEAD-0 landscape
+#   ./HUION.sh left portrait    -> HEAD-1 portrait
+#   ./HUION.sh portrait         -> HEAD-1 portrait
+#   ./HUION.sh portrait normal  -> HEAD-1 portrait without axis inversion
 # Default keeps the current working setup.
-case "${1:-left}" in
+monitor_arg="${1:-left}"
+orientation_arg="${2:-landscape}"
+direction_arg="${3:-normal}"
+
+if [ "$monitor_arg" = "portrait" ]; then
+  monitor_arg="left"
+  orientation_arg="portrait"
+  direction_arg="${2:-invert}"
+fi
+
+case "$monitor_arg" in
   left|HEAD-1|1)
     monitor_output="HEAD-1"
     ;;
@@ -37,9 +50,12 @@ case "${1:-left}" in
     monitor_output="HEAD-0"
     ;;
   -h|--help|help)
-    echo "Usage: $0 [left|right]"
-    echo "  left  maps the tablet to HEAD-1"
-    echo "  right maps the tablet to HEAD-0"
+    echo "Usage: $0 [left|right] [landscape|portrait]"
+    echo "  left             maps the tablet to HEAD-1 in landscape mode"
+    echo "  right            maps the tablet to HEAD-0 in landscape mode"
+    echo "  left portrait    maps the tablet to HEAD-1 in portrait mode"
+    echo "  portrait         shortcut for: left portrait invert"
+    echo "  portrait normal  maps to portrait without inverting the axes"
     exit 0
     ;;
   *)
@@ -48,9 +64,46 @@ case "${1:-left}" in
     ;;
 esac
 
+case "$orientation_arg" in
+  landscape)
+    screenX=1920
+    screenY=1080
+    map_to_output="$monitor_output"
+    tablet_rotate="none"
+    ;;
+  portrait)
+    screenX=1080
+    screenY=1920
+    map_to_output="$monitor_output"
+    case "$direction_arg" in
+      invert|inverted|half)
+        tablet_rotate="half"
+        ;;
+      normal|none)
+        tablet_rotate="none"
+        ;;
+      *)
+        echo "Unknown portrait direction '$direction_arg'. Use: invert or normal." >&2
+        exit 1
+        ;;
+    esac
+    ;;
+  *)
+    echo "Unknown orientation '$orientation_arg'. Use: landscape or portrait." >&2
+    exit 1
+    ;;
+esac
+
+if [ "$monitor_output" = "HEAD-1" ] && [ "$orientation_arg" = "portrait" ]; then
+  # HEAD-1 still behaves like a 1920x1080 output here, so the right side
+  # of the tablet spills into HEAD-0. Use the explicit rotated geometry.
+  map_to_output="1080x1920+0+0"
+fi
+
 # Reset
 xsetwacom --set "$tabletstylus" ResetArea
 xsetwacom --set "$tabletstylus" RawSample 4
+xsetwacom --set "$tabletstylus" Rotate "$tablet_rotate"
 
 # Mapping
 # get maximum size geometry with:
@@ -58,21 +111,29 @@ xsetwacom --set "$tabletstylus" RawSample 4
 # 0 0 55200 34500
 tabletX=55200
 tabletY=34500
-# screen size:
-screenX=1920
-screenY=1080
+# screen size is set by the selected orientation above.
 # map to good screen (dual nvidia)
 # xrandr command to obtain displays
 # there is a nvidia bug -> use HEAD-0 -1 , n instead of output from xrandr
 
 # HDMI-0 should work according to xrandr, but does not map correctly here.
 # xsetwacom --set "$tabletstylus" MapToOutput HDMI-0
-xsetwacom --set "$tabletstylus" MapToOutput "$monitor_output"
+xsetwacom --set "$tabletstylus" MapToOutput "$map_to_output"
 
 
 # setup ratio :
-newtabletY=$(( $screenY * $tabletX / $screenX ))
-xsetwacom --set "$tabletstylus" Area 0 0 "$tabletX" "$newtabletY"
+if [ "$orientation_arg" = "portrait" ]; then
+  # The display is rotated in Linux settings, not by rotating the tablet.
+  # Keep the full tablet active so the side regions do not clamp to the edge.
+  xsetwacom --set "$tabletstylus" Area 0 0 "$tabletX" "$tabletY"
+elif [ $(( screenY * tabletX / screenX )) -le "$tabletY" ]; then
+  newtabletY=$(( screenY * tabletX / screenX ))
+  xsetwacom --set "$tabletstylus" Area 0 0 "$tabletX" "$newtabletY"
+else
+  newtabletX=$(( screenX * tabletY / screenY ))
+  tabletXOffset=$(( (tabletX - newtabletX) / 2 ))
+  xsetwacom --set "$tabletstylus" Area "$tabletXOffset" 0 "$(( tabletXOffset + newtabletX ))" "$tabletY"
+fi
 
 # Buttons  (optimized for xournal app)
 # =======
