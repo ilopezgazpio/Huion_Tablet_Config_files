@@ -25,6 +25,29 @@ tabletstylus="TABLET Pen Tablet stylus"
 tabletpad="TABLET Pen Tablet Pad pad"
 # tabletpad="TABLET Pen Tablet Touch Strip pad"
 
+# Monitor mapping:
+#   ./HUION.sh left   -> HEAD-1
+#   ./HUION.sh right  -> HEAD-0
+# Default keeps the current working setup.
+case "${1:-left}" in
+  left|HEAD-1|1)
+    monitor_output="HEAD-1"
+    ;;
+  right|HEAD-0|0)
+    monitor_output="HEAD-0"
+    ;;
+  -h|--help|help)
+    echo "Usage: $0 [left|right]"
+    echo "  left  maps the tablet to HEAD-1"
+    echo "  right maps the tablet to HEAD-0"
+    exit 0
+    ;;
+  *)
+    echo "Unknown monitor '$1'. Use: left, right, HEAD-1, or HEAD-0." >&2
+    exit 1
+    ;;
+esac
+
 # Reset
 xsetwacom --set "$tabletstylus" ResetArea
 xsetwacom --set "$tabletstylus" RawSample 4
@@ -42,8 +65,10 @@ screenY=1080
 # xrandr command to obtain displays
 # there is a nvidia bug -> use HEAD-0 -1 , n instead of output from xrandr
 
-#xsetwacom --set "$tabletstylus" MapToOutput HEAD-0
-xsetwacom --set "$tabletstylus" MapToOutput HDMI-A-0
+# HDMI-0 should work according to xrandr, but does not map correctly here.
+# xsetwacom --set "$tabletstylus" MapToOutput HDMI-0
+xsetwacom --set "$tabletstylus" MapToOutput "$monitor_output"
+
 
 # setup ratio :
 newtabletY=$(( $screenY * $tabletX / $screenX ))
