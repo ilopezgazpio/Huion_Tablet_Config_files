@@ -50,10 +50,10 @@ case "$monitor_arg" in
     monitor_output="HEAD-0"
     ;;
   -h|--help|help)
-    echo "Usage: $0 [left|right] [landscape|portrait]"
+    echo "Usage: $0 [left|right] [landscape|portrait] [invert|normal]"
     echo "  left             maps the tablet to HEAD-1 in landscape mode"
     echo "  right            maps the tablet to HEAD-0 in landscape mode"
-    echo "  left portrait    maps the tablet to HEAD-1 in portrait mode"
+    echo "  left portrait    maps the centered tablet area to HEAD-1 in portrait mode"
     echo "  portrait         shortcut for: left portrait invert"
     echo "  portrait normal  maps to portrait without inverting the axes"
     exit 0
@@ -123,9 +123,11 @@ xsetwacom --set "$tabletstylus" MapToOutput "$map_to_output"
 
 # setup ratio :
 if [ "$orientation_arg" = "portrait" ]; then
-  # The display is rotated in Linux settings, not by rotating the tablet.
-  # Keep the full tablet active so the side regions do not clamp to the edge.
-  xsetwacom --set "$tabletstylus" Area 0 0 "$tabletX" "$tabletY"
+  # Keep the full vertical range, but use a centered horizontal range with
+  # the same physical scale as vertical movement on the portrait display.
+  newtabletX=$(( screenX * tabletY / screenY ))
+  tabletXOffset=$(( (tabletX - newtabletX) / 2 ))
+  xsetwacom --set "$tabletstylus" Area "$tabletXOffset" 0 "$(( tabletXOffset + newtabletX ))" "$tabletY"
 elif [ $(( screenY * tabletX / screenX )) -le "$tabletY" ]; then
   newtabletY=$(( screenY * tabletX / screenX ))
   xsetwacom --set "$tabletstylus" Area 0 0 "$tabletX" "$newtabletY"
