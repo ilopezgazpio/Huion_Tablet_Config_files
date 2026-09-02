@@ -7,9 +7,8 @@
 
 # HARDWARE PARTS
 # sudo apt install dkms git-core
-# sudo git clone https://github.com/DIGImend/digimend-kernel-drivers.git /usr/src/digimend-9
-# sudo dkms build digimend/9
-# sudo dkms install digimend/9
+# sudo apt install digimend-dkms
+
 
 # xinput --list
 # dkms status
@@ -22,7 +21,7 @@
 # PAD SHOULD HAVE NAME AS BELOW
 # Tablet definition
 tabletstylus="TABLET Pen Tablet stylus"
-tabletpad="TABLET Pen Tablet Pad pad"
+tabletpad="TABLET Pen Tablet pad"
 # tabletpad="TABLET Pen Tablet Touch Strip pad"
 
 # Monitor mapping:
