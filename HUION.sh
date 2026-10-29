@@ -20,8 +20,8 @@
 
 # PAD SHOULD HAVE NAME AS BELOW
 # Tablet definition
-tabletstylus="TABLET Pen Tablet stylus"
-tabletpad="TABLET Pen Tablet pad"
+tabletstylus="TABLET Pen Tablet Pen stylus"
+tabletpad="TABLET Pen Tablet Pad pad"
 # tabletpad="TABLET Pen Tablet Touch Strip pad"
 
 # Monitor mapping:
@@ -107,9 +107,9 @@ xsetwacom --set "$tabletstylus" Rotate "$tablet_rotate"
 # Mapping
 # get maximum size geometry with:
 # xsetwacom --get "$tabletstylus" Area
-# 0 0 55200 34500
-tabletX=55200
-tabletY=34500
+# 0 0 70104 43815
+tabletX=70104
+tabletY=43815
 # screen size is set by the selected orientation above.
 # map to good screen (dual nvidia)
 # xrandr command to obtain displays
